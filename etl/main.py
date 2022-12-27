@@ -1,26 +1,31 @@
-from datetime import datetime
-
 from psycopg2 import connect
 from psycopg2.extras import DictCursor
-from settings import PostgreSQL
-from qyeries import genres, persons, film_work
-from elasticsearch import Elasticsearch, helpers
-from schema import mappings, settings
+
+
+from load_data import Postgres
+from utils.settings import PostgreSQL
+from utils.storage import State, JsonFileStorage
+
+
+def build_storage():
+    state = State(JsonFileStorage('file_path.json'))
+    return state
+
+
+def load_datas_from_psql_to_es():
+    obj, storage = PostgreSQL(), build_storage()
+    with connect(**obj.dict(), cursor_factory=DictCursor) as pg_conn:
+        postgres_datas = Postgres(pg_conn, storage)
+        _, *end = postgres_datas()
 
 
 def main():
-    obj = PostgreSQL()
-    with connect(**obj.dict(), cursor_factory=DictCursor) as pg_conn:
-        cur = pg_conn.cursor()
-        query = genres % ''
-        cur.execute(query)
-        for i in cur:
-            print(i)
+    load_datas_from_psql_to_es()
 
 
 if __name__ == '__main__':
-    # main()
-    es = Elasticsearch(hosts='http://localhost:9200/')
+    main()
+    # es = Elasticsearch(hosts='http://localhost:9200/')
 
     # body = {
     #     "dynamic": "strict",
@@ -58,4 +63,4 @@ if __name__ == '__main__':
         }
     }]
 
-    helpers.bulk(es, action)
+    # helpers.bulk(es, action)
