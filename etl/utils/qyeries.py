@@ -30,18 +30,18 @@ SELECT
        ) FILTER (WHERE pfw.role = 'director'),
        '{}'
    ) as director,
+   COALESCE (
+       ARRAY_AGG(
+           DISTINCT (p.full_name)
+       ) FILTER (WHERE pfw.role = 'actor'),
+       '{}'
+   ) as actors_names,
      COALESCE (
        ARRAY_AGG(
            DISTINCT (p.full_name)
        ) FILTER (WHERE pfw.role = 'writer'),
        '{}'
    ) as writers_names,
-    COALESCE (
-       ARRAY_AGG(
-           DISTINCT (p.full_name)
-       ) FILTER (WHERE pfw.role = 'actor'),
-       '{}'
-   ) as actors_names,
     COALESCE (
        JSON_AGG(
            DISTINCT JSONB_BUILD_OBJECT(
