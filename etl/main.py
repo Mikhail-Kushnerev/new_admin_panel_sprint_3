@@ -1,11 +1,11 @@
-from elasticsearch import Elasticsearch
-from psycopg2 import connect
-from psycopg2.extras import DictCursor
+import logging
 
+from tqdm import tqdm
 
 from load_data import Postgres, Elastic
-from utils.constants import HOST, PORT
-from utils.settings import PostgreSQL
+from utils.core import connect_to_db
+from utils.logger import get_logger
+from utils.settings import postgres
 from utils.storage import State, JsonFileStorage
 
 
@@ -15,18 +15,21 @@ def build_storage():
 
 
 def load_datas_from_psql_to_es():
-    obj, es, storage = PostgreSQL(), Elasticsearch(hosts=f'{HOST}:{PORT}'), build_storage()
-    elastic = Elastic(es)
-    with connect(**obj.dict(), cursor_factory=DictCursor) as pg_conn:
-        postgres_datas = Postgres(pg_conn, storage)
-        for data in postgres_datas():
-            # print(data)
-            elastic.create_body_documents(data)
+    obj, storage = postgres, build_storage()
+    conn = connect_to_db(obj)
+    with conn as db_base:
+        logging.info('Подключение к базам данных прошло успешно')
+        postgres_datas = Postgres(db_base['postgres'], storage)
+        elastics = Elastic(db_base['elastic'])
+        for data in tqdm(postgres_datas()):
+            elastics.create_body_documents(data)
 
 
 def main():
+    # get_logger()
     load_datas_from_psql_to_es()
 
 
 if __name__ == '__main__':
+    # get_logger()
     main()

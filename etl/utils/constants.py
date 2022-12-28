@@ -7,3 +7,7 @@ DOCUMENT_BODY = {
 
 HOST = 'http://localhost'
 PORT = 9200
+
+LOGS_FORMAT = "|\t%(asctime)s – [%(levelname)s]: %(message)s. " \
+              "Исполняемый файл – '%(filename)s': " \
+              "функция – '%(funcName)s'(%(lineno)d)"

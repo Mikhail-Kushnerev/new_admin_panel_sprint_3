@@ -73,5 +73,5 @@ ORDER BY fw.updated_at;
 first_film_work = '''
 SELECT fw.updated_at AS date
 FROM content.film_work fw
-ORDER BY date;
+ORDER BY date %s;
 '''
