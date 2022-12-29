@@ -1,6 +1,6 @@
 import logging
 
-from etl.utils.constants import LOGS_FORMAT
+from postgres_to_es.utils.constants import LOGS_FORMAT
 
 
 def get_logger():

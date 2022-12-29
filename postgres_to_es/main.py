@@ -4,7 +4,7 @@ from tqdm import tqdm
 
 from load_data import Postgres, Elastic
 from utils.core import connect_to_db
-from utils.logger import get_logger
+# from utils.logger import get_logger
 from utils.settings import postgres
 from utils.storage import State, JsonFileStorage
 

@@ -20,7 +20,7 @@ class Postgres:
         query = first_film_work % self.mode
         self.__cur.execute(query)
         result = self.__cur.fetchone()
-        date_first_film_work = result
+        date_first_film_work = result[0]
         return date_first_film_work
 
     def take_datas_by_date(self):
@@ -40,7 +40,7 @@ class Postgres:
 
                 self.start += len(ids_coll)
                 start += mid
-                self.storage.set_state('stop', self.start)
+                self.storage.set_state('finished part', self.start)
                 yield ids_coll
 
     def take_film_works_by_needed_ids(self):

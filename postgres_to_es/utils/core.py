@@ -6,8 +6,8 @@ from elasticsearch import Elasticsearch
 from psycopg2 import connect
 from psycopg2.extras import DictCursor
 
-from etl.utils.logger import get_logger
-from etl.utils.settings import elastic
+from postgres_to_es.utils.logger import get_logger
+from postgres_to_es.utils.settings import elastic
 
 
 def backoff(start_sleep_time=0.1, factor=2, border_sleep_time=10):
@@ -18,7 +18,7 @@ def backoff(start_sleep_time=0.1, factor=2, border_sleep_time=10):
             n = 0
             while True:
                 try:
-                    result = func(*args, **kwargs)
+                    return func(*args, **kwargs)
                 except Exception as error:
                     if start_sleep_time < border_sleep_time:
                         start_sleep_time = start_sleep_time * (factor ** n)
@@ -27,8 +27,6 @@ def backoff(start_sleep_time=0.1, factor=2, border_sleep_time=10):
                     n += 1
                     get_logger().error(error)
                     sleep(start_sleep_time)
-                else:
-                    return result
 
         return inner
 
@@ -43,7 +41,9 @@ def connect_to_db(obj):
 
     @backoff()
     def es():
-        return Elasticsearch(hosts=elastic.elastic_url())
+        es_conn = Elasticsearch(hosts=elastic.elastic_url())
+        es_conn.info()
+        return es_conn
 
     result = db()
     result_ = es()
