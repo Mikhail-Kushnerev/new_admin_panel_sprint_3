@@ -6,8 +6,8 @@ from elasticsearch import Elasticsearch
 from psycopg2 import connect
 from psycopg2.extras import DictCursor
 
-from postgres_to_es.utils.logger import get_logger
-from postgres_to_es.utils.settings import elastic
+from utils.logger import get_logger
+from utils.settings import elastic
 
 
 def backoff(start_sleep_time=0.1, factor=2, border_sleep_time=10):

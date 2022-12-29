@@ -1,6 +1,6 @@
 import logging
 
-from postgres_to_es.utils.constants import LOGS_FORMAT
+from utils.constants import LOGS_FORMAT
 
 
 def get_logger():
