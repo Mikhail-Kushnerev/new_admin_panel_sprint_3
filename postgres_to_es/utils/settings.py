@@ -9,7 +9,7 @@ class PostgresConfig(BaseSettings):
     port: int = Field(..., env='POSTGRES_PORT')
 
     class Config:
-        env_file = ".env"
+        env_file = "../.env"
 
 
 class ElasticConfig(BaseSettings):
@@ -20,7 +20,7 @@ class ElasticConfig(BaseSettings):
         return 'http://{host}:{port}/'.format(host=self.host, port=self.port)
 
     class Config:
-        env_file = '.env'
+        env_file = '../.env'
 
 
 postgres = PostgresConfig()

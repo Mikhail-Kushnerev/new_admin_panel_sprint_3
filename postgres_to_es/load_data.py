@@ -1,8 +1,9 @@
+import json
+
 from elasticsearch.helpers import bulk
 from elasticsearch import NotFoundError
 
 from utils.constants import DOCUMENT_BODY, INDEX_NAME
-from utils.core import backoff
 from utils.qyeries import first_film_work, genres, film_work, persons
 from utils.schema import mappings, settings
 
@@ -13,7 +14,6 @@ class Postgres:
         self.start = 0
         self.checkpoint = checkpoint
         self.storage = storage
-        self.foo = backoff
         self.mode = 'ASC'
 
     def take_first_film_work_date(self):
@@ -24,12 +24,10 @@ class Postgres:
         return date_first_film_work
 
     def take_datas_by_date(self):
-        if not self.checkpoint:
-            self.checkpoint = self.take_first_film_work_date()
-
         for query in (persons, genres):
             self.__cur.execute(query % self.checkpoint)
             result = list(self.__cur)
+            print(len(result))
             start, end, mid = 0, len(result), 50
 
             while start <= end:
@@ -40,7 +38,6 @@ class Postgres:
 
                 self.start += len(ids_coll)
                 start += mid
-                self.storage.set_state('finished part', self.start)
                 yield ids_coll
 
     def take_film_works_by_needed_ids(self):
@@ -49,15 +46,21 @@ class Postgres:
             self.__cur.execute(query)
 
             for j in self.__cur:
-                yield dict(j)
+                target = dict(j)
+                date = target.pop('updated_at')
+                self.storage.set_state(
+                    'finished part',
+                    json.dumps(date, default=str)
+                )
+                yield target
 
     def __call__(self, *args, **kwargs):
+        self.checkpoint = self.storage.get_state('finished part')
+        if not self.checkpoint:
+            self.checkpoint = self.take_first_film_work_date()
         for data in self.take_film_works_by_needed_ids():
             task = dict(data)
             yield task
-        else:
-            self.mode = 'DESC'
-            self.checkpoint = self.take_first_film_work_date()
 
 
 class Elastic:

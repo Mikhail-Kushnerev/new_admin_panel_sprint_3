@@ -15,6 +15,7 @@ WHERE p.updated_at > '%s';
 film_work = '''
 SELECT
     fw.id,
+    fw.updated_at,
     fw.rating AS imdb_rating,
     COALESCE (
         ARRAY_AGG(
