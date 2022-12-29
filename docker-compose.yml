@@ -1,0 +1,50 @@
+version: '3.8'
+services:
+
+  db:
+    image: postgres:latest
+    volumes:
+      - /var/lib/postgresql/data/
+    env_file:
+      - "./.env"
+
+  es:
+    image: elasticsearch:7.17.8
+    volumes:
+      - /usr/share/elasticsearch/data
+    environment:
+      discovery.type: single-node
+      ES_JAVA_OPTS: "-Xmx512m -Xms512m"
+    ports:
+      - "9200:9200"
+
+  backend:
+    build: app
+    env_file:
+      - "/./.env"
+    volumes:
+      - static_value:/opt/app/static
+      - media_value:/opt/app/media
+    depends_on:
+      - db
+    command: ["./wait-for-db.sh"]
+
+  nginx:
+    image: nginx:latest
+    depends_on:
+      - backend
+    volumes:
+      - ./etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./etc/nginx/conf.d/site.conf:/etc/nginx/conf.d/default.conf:ro
+      - static_value:/var/html/static/
+      - media_value:/var/html/media/
+    ports:
+      - "80:80"
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  static_value:
+  media_value:
