@@ -1,18 +1,18 @@
-genres = '''
+genres_query: str = '''
 SELECT DISTINCT gfw.film_work_id
 FROM content.genre g
 LEFT JOIN content.genre_film_work gfw ON gfw.genre_id = g.id
 WHERE g.updated_at >= '%s';
 '''
 
-persons = '''
+persons_query: str = '''
 SELECT DISTINCT pfw.film_work_id
 FROM content.person p
 LEFT JOIN content.person_film_work pfw ON pfw.person_id = p.id
-WHERE p.updated_at > '%s';
+WHERE p.updated_at >= '%s';
 '''
 
-film_work = '''
+film_work_query: str = '''
 SELECT
     fw.id,
     fw.updated_at,
@@ -68,11 +68,11 @@ LEFT JOIN content.genre_film_work gfw ON gfw.film_work_id = fw.id
 LEFT JOIN content.genre g ON gfw.genre_id = g.id
 WHERE fw.id IN %s
 GROUP BY fw.id
-ORDER BY fw.updated_at;
+ORDER BY fw.updated_at ASC;
 '''
 
-first_film_work = '''
+first_film_work_query: str = '''
 SELECT fw.updated_at AS date
 FROM content.film_work fw
-ORDER BY date %s;
+ORDER BY date ASC;
 '''

@@ -1,4 +1,20 @@
-from pydantic import BaseSettings, Field
+from typing import Optional
+from uuid import UUID
+
+from pydantic import BaseSettings, BaseModel, Field
+
+
+class Model(BaseModel):
+    id: UUID
+    imdb_rating: float
+    genre: list[str]
+    title: str
+    description: Optional[str]
+    director: list[Optional[str]]
+    actors_names: list[str]
+    writers_names: list[str]
+    actors: list[dict[str, str]]
+    writers: list[dict[str, str]]
 
 
 class PostgresConfig(BaseSettings):
@@ -23,5 +39,5 @@ class ElasticConfig(BaseSettings):
         env_file = '../.env'
 
 
-postgres = PostgresConfig()
-elastic = ElasticConfig()
+postgres: PostgresConfig = PostgresConfig()
+elastic: ElasticConfig = ElasticConfig()

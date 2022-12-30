@@ -1,0 +1,10 @@
+**/*.md
+
+**/__pycache__
+
+movies/api/tests
+movies/api/openapi.yaml
+
+sqlite_to_postgres/.pytest_cache
+sqlite_to_postgres/tests
+sqlite_to_postgres/test_load_data.py

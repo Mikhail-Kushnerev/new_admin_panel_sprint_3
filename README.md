@@ -32,7 +32,7 @@
   </summary>
 
 ```cmd
-new_admin_panel_sprint_2:.
+new_admin_panel_sprint_3:.
 |   .env.example <-- Заполнить своими данными
 |   .gitignore
 |   docker-compose.yml <-- Сборка контейнеров через Docker
@@ -144,16 +144,6 @@ ELASTIC_PORT=9200
     make load-db
     ```
 
-Для переноса данных с базы в **ElasticSearch**:
-- в том же контейнере
-    ```python
-    python postgres_to_es/main.py
-    ```
-    ИЛИ
-- через **Makefile**
-    ```python
-    make load-es
-    ```
   [⬆️Оглавление](#оглавление)
 
 ## Авторы

@@ -1,6 +1,6 @@
 import logging
 
-from utils.constants import LOGS_FORMAT
+from utils import LOGS_FORMAT
 
 
 def get_logger():

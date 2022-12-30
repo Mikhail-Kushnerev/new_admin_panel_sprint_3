@@ -1,21 +1,28 @@
 from contextlib import contextmanager
 from functools import wraps
 from time import sleep
+from typing import Callable
 
 from elasticsearch import Elasticsearch
 from psycopg2 import connect
 from psycopg2.extras import DictCursor
+from psycopg2.extensions import connection
 
-from utils.logger import get_logger
-from utils.settings import elastic
+from utils import get_logger, elastic
+from .settings import PostgresConfig
 
 
-def backoff(start_sleep_time=0.1, factor=2, border_sleep_time=10):
-    def func_wrapper(func):
+def backoff(
+        start_sleep_time=0.1,
+        *,
+        factor: int = 2,
+        border_sleep_time: int = 10
+) -> Callable:
+    def func_wrapper(func: Callable) -> Callable:
         @wraps(func)
-        def inner(*args, **kwargs):
+        def inner(*args, **kwargs) -> Callable:
             nonlocal start_sleep_time
-            n = 0
+            n: int = 0
             while True:
                 try:
                     return func(*args, **kwargs)
@@ -34,19 +41,19 @@ def backoff(start_sleep_time=0.1, factor=2, border_sleep_time=10):
 
 
 @contextmanager
-def connect_to_db(obj):
+def connect_to_db(obj: PostgresConfig):
     @backoff()
-    def db():
+    def db() -> connection:
         return connect(**obj.dict(), cursor_factory=DictCursor)
 
     @backoff()
-    def es():
-        es_conn = Elasticsearch(hosts=elastic.elastic_url())
+    def es() -> Elasticsearch:
+        es_conn: Elasticsearch = Elasticsearch(hosts=elastic.elastic_url())
         es_conn.info()
         return es_conn
 
-    result = db()
-    result_ = es()
+    result: connection = db()
+    result_: Elasticsearch = es()
 
     try:
         yield {

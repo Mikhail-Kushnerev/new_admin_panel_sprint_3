@@ -5,19 +5,28 @@ services:
     image: postgres:latest
     restart: always
     volumes:
-      - /var/lib/postgresql/data/
+      - db_datas:/var/lib/postgresql/data/
     env_file:
       - "./.env"
-    ports:
-      - "5432:5432"
+
+  backend:
+    build: app
+    env_file:
+      - "./.env"
+    volumes:
+      - static_value:/opt/app/static
+      - media_value:/opt/app/media
+    depends_on:
+      - db
+    command: ["./wait-for-db.sh"]
 
   es:
     image: elasticsearch:7.17.8
     depends_on:
-      - db
+      - backend
     restart: always
     volumes:
-      - /usr/share/elasticsearch/data
+      - es_datas:/usr/share/elasticsearch/data
     environment:
       discovery.type: single-node
       ES_JAVA_OPTS: "-Xmx512m -Xms512m"
@@ -26,38 +35,31 @@ services:
 
   etl:
     build: postgres_to_es
-    env_file:
-      - ".env"
-    command: python main.py
-
-  backend:
-    build: app
     restart: always
     env_file:
-      - ".env"
+      - "./.env"
     volumes:
-      - static_value:/opt/app/static
-      - media_value:/opt/app/media
+      - checkpoint:/opt/etl/results
     depends_on:
       - es
-    command: ["./wait-for-es.sh"]
+    command: [ "./wait-for-es.sh" ]
 
   nginx:
     image: nginx:latest
     depends_on:
-      - backend
+      - etl
     volumes:
       - ./etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./etc/nginx/conf.d/site.conf:/etc/nginx/conf.d/default.conf:ro
+      - checkpoint:/var/html/etl_value/
       - static_value:/var/html/static/
       - media_value:/var/html/media/
     ports:
       - "80:80"
 
-networks:
-  app-network:
-    driver: bridge
-
 volumes:
+  db_datas:
+  es_datas:
+  checkpoint:
   static_value:
   media_value:

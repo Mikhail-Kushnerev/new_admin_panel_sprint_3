@@ -25,7 +25,7 @@ class JsonFileStorage(BaseStorage):
             return {}
 
     def save_state(self, state: dict) -> None:
-        states = self.retrieve_state()
+        states: dict = self.retrieve_state()
         states.update(state)
         try:
             with open(self.file_path, "w", encoding="utf-8") as f:
@@ -37,13 +37,13 @@ class JsonFileStorage(BaseStorage):
 class State:
 
     def __init__(self, storage: BaseStorage):
-        self.storage = storage
+        self.storage: BaseStorage = storage
 
     def set_state(self, key: str, value: Any) -> None:
         if value:
             self.storage.save_state({key: value})
 
     def get_state(self, key: str) -> Any:
-        states = self.storage.retrieve_state()
+        states: dict = self.storage.retrieve_state()
 
         return states.get(key)

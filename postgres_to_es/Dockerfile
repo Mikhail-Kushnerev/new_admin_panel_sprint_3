@@ -8,3 +8,5 @@ RUN pip install --upgrade pip \
     && pip install -r /opt/etl/requirements.txt
 
 COPY . .
+
+ENTRYPOINT ["sh", "docker-entrypoint.sh"]
