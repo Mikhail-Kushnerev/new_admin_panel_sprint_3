@@ -26,6 +26,14 @@
 - Nginx
 - Docker
 
+# ATTENTION
+
+В случае конфликта при сборке **docker-compose** с сообщением `maybe you mean ...` уберите
+в файле **docker-entrypoints.sh**, в первой строчке последние два символа:
+```git
+#!/bin/bash^M --> #!/bin/bash 
+``` 
+
 <details open>
   <summary>
     <h2 id="#structure">Структура проекта</h2>

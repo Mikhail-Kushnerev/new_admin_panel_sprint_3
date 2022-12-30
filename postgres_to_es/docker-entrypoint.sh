@@ -1,4 +1,4 @@
-#!/bin/bash^M
+#!/bin/bash
 
 # Collect static files
 echo "Run ETL"
