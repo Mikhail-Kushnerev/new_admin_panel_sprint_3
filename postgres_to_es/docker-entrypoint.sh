@@ -1,5 +1,5 @@
-#!/bin/bash
+#!/bin/bash^M
 
-# Collect static files
+# Run script
 echo "Run ETL"
 python main.py

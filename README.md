@@ -32,7 +32,8 @@
 в файле **docker-entrypoints.sh**, в первой строчке последние два символа:
 ```git
 #!/bin/bash^M --> #!/bin/bash 
-``` 
+```
+P.s. данная ошибка была замечена на ОС семейства **Windows**
 
 <details open>
   <summary>
@@ -40,50 +41,43 @@
   </summary>
 
 ```cmd
-new_admin_panel_sprint_3:.
-|   .env.example <-- Заполнить своими данными
+new_admin_sprint_3:.
+|   .env.example  <-- Переменные окружения (настроить под себя)
 |   .gitignore
 |   docker-compose.yml <-- Сборка контейнеров через Docker
 |   Makefile <-- Сборка контейнеров через Makefile
 |   README.md
-|               
-+---app
-|   |   docker-entrypoint.sh
-|   |   Dockerfile
-|   |   manage.py
-|   |   README.md
-|   |   requirements.txt
-|   |   __init__.py
-  ...
+|
++---app  <-- Django проект
 |   |
-|   +---movies
+|   +---movies  <-- Django приложение
 |   |   |
-|   |   +---api
+|   |   +---api  <-- API приложения movies
 |   |   |   |
-|   |   |   +---tests <-- Тестирование API, запущенное в контейнере
-|   |
-|   +---postgres_to_es
-|   |   |   load_data.py
-|   |   |   main.py  <-- Точка входа для переноса данных с PostgreSQL -> ElasticSearch
-|   |   |   README.md
-|   |   |   __init__.py
-|   |   |   
-|   |   +---tests
-|   |   |       ETLTests-2.json <-- Тестирование Elastsearch, запущенного в контейнере
-...
+|   |   |   +---tests <-- Тестированиие API, запущенного в контейнере, через Postman
 |   |
 |   +---sqlite_to_postgres
-|   |   |   db.sqlite
-|   |   |   load_data.py <-- Заполнение PostgreSQL БД
-|   |   |   models.py
-|   |   |   README.md
-|   |   |   test_load_data.py
-|   |   |   __init__.py
 |   |   |
-    ...
-|   |   |
-|           
-+---infra
+...
+|   |   |  load_data.py  <-- Скрипт для переноса БД с Sqlite в PostgreSQL
+...
+|   |
++---etc  <-- Конфигурация Nginx
+|
+\---postgres_to_es
+    |   .dockerignore
+    |   docker-entrypoint.sh
+    |   Dockerfile
+    |   load_data.py
+    |   main.py  <-- Точка входа для переноса БД с PostgreSQL в ElasticSearch
+    |   README.md
+    |   requirements.txt
+    |   wait-for-es.sh
+    |   __init__.py
+    |   
+    +---tests  <-- Тестирование ElasticSearch, запущенного в контейнере, через Postman
+    |       
+    \---utils
 ```
 
 </details>
@@ -94,7 +88,7 @@ new_admin_panel_sprint_3:.
 
 Склонируйте репозиторий
 ```git
-git clone https://github.com/Mikhail-Kushnerev/new_admin_panel_sprint_2
+git clone https://github.com/Mikhail-Kushnerev/new_admin_panel_sprint_3
 ```
 
 Переименуйте файл **.env.example** в **.env** и заполните своими данными.
@@ -110,13 +104,15 @@ TEST_DB=<path-to-original-sqlitedb>
 
 POSTGRES_ENGINE='django.db.backends.postgresql'
 POSTGRES_DB='postgres'
-POSTGRES_USERNAME='postgres'
+POSTGRES_USER='postgres'
 POSTGRES_PASSWORD='postgres'
 POSTGRES_HOST='<db-container-name>'
 POSTGRES_PORT=5432
 
 ELASTIC_HOST='<es-container-name>'
 ELASTIC_PORT=9200
+
+TIME_TO_SLEEP=<set-value>
 ```
 
 Соберите контейнеры из главной директории:
@@ -139,17 +135,6 @@ ELASTIC_PORT=9200
 - через **Makefile**
     ```
     make create-user
-    ```
-
-Для заполнения баз данных выполните команду:
-- в том же контейнере
-    ```python
-    python sqlite_to_postgres/load_data.py
-    ```
-    ИЛИ
-- через **Makefile**
-    ```python
-    make load-db
     ```
 
   [⬆️Оглавление](#оглавление)
