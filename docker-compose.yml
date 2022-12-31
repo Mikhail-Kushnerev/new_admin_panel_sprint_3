@@ -3,61 +3,67 @@ services:
 
   db:
     image: postgres:latest
-    restart: always
-    volumes:
-      - db_datas:/var/lib/postgresql/data/
+    env_file:
+      - "./.env"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -q -d ${POSTGRES_DB} -U ${POSTGRES_USER}"]
+      test: [ "CMD-SHELL", "pg_isready -q -d ${POSTGRES_DB} -U ${POSTGRES_USER}" ]
       interval: 5s
       timeout: 5s
       retries: 5
-    env_file:
-      - "./.env"
+    volumes:
+      - db_datas:/var/lib/postgresql/data/
+    restart: always
+
 
   backend:
     build: app
     env_file:
       - "./.env"
-    volumes:
-      - static_value:/opt/app/static
-      - media_value:/opt/app/media
     depends_on:
       db:
         condition: service_healthy
-    entrypoint: ["sh", "docker-entrypoint.sh"]
+    volumes:
+      - static_value:/opt/app/static
+      - media_value:/opt/app/media
+    entrypoint: [ "sh", "docker-entrypoint.sh" ]
+    restart: always
 
   es:
     image: elasticsearch:7.17.8
-    depends_on:
-      - backend
-    restart: always
-    volumes:
-      - es_datas:/usr/share/elasticsearch/data
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://${ELASTIC_HOST}:${ELASTIC_PORT}"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+    ports:
+      - "9200:9200"
     environment:
       discovery.type: single-node
       ES_JAVA_OPTS: "-Xmx512m -Xms512m"
-    ports:
-      - "9200:9200"
+    depends_on:
+      - backend
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://${ELASTIC_HOST}:${ELASTIC_PORT}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - es_datas:/usr/share/elasticsearch/data
+    restart: always
+
+
 
   etl:
     build: postgres_to_es
-    restart: always
     env_file:
       - "./.env"
-    volumes:
-      - checkpoint:/opt/etl/results
     depends_on:
       es:
         condition: service_healthy
-    entrypoint: ["bash", "./docker-entrypoint.sh"]
+    volumes:
+      - checkpoint:/opt/etl/results
+    entrypoint: [ "bash", "./docker-entrypoint.sh" ]
+    restart: always
 
   nginx:
     image: nginx:latest
+    ports:
+      - "80:80"
     depends_on:
       - etl
     volumes:
@@ -66,8 +72,6 @@ services:
       - checkpoint:/var/html/etl_value/
       - static_value:/var/html/static/
       - media_value:/var/html/media/
-    ports:
-      - "80:80"
 
 volumes:
   db_datas:
