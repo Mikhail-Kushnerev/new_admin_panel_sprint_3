@@ -13,5 +13,3 @@ RUN  pip install --upgrade pip \
 COPY . .
 
 EXPOSE 8000
-
-ENTRYPOINT ["sh", "docker-entrypoint.sh"]
